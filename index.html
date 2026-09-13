@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radicals — Log Book</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><rect width='24' height='24' fill='%23ff5c1a'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#101113; --bg2:#16171a; --line:#26282c; --line-soft:#1e2024;
+    --text:#e9e7e2; --muted:#8f8e89; --faint:#5c5b57;
+    --orange:#ff5c1a; --orange-dim:rgba(255,92,26,.13);
+    --steel:#9aa2ac; --danger:#e5484d; --warn:#e0a34e;
+    --font-d:'Chakra Petch',sans-serif; --font-m:'IBM Plex Mono',monospace;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font:400 15px/1.5 var(--font-d);-webkit-font-smoothing:antialiased}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:linear-gradient(rgba(255,255,255,.024) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(255,255,255,.024) 1px,transparent 1px);
+    background-size:56px 56px}
+  ::selection{background:var(--orange);color:#1a0d05}
+  button{font-family:var(--font-d)}
+  :focus-visible{outline:2px solid rgba(255,92,26,.7);outline-offset:2px}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#2c2e33;border-radius:5px}
+  ::-webkit-scrollbar-track{background:transparent}
+
+  .stripe{height:3px;background:var(--orange);position:relative;z-index:1}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 clamp(16px,4vw,32px);position:relative;z-index:1}
+  .overline{font:600 10px/1 var(--font-m);letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+
+  /* ---------- masthead ---------- */
+  .masthead{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;padding:34px 0 26px;border-bottom:1px solid var(--line)}
+  .masthead h1{font:700 clamp(30px,4.6vw,52px)/1.05 var(--font-d);letter-spacing:.01em;text-transform:uppercase;margin:12px 0 8px;outline:none;border-bottom:1px dashed transparent;cursor:text}
+  .masthead h1[contenteditable="false"]{cursor:default;border-color:transparent!important}
+  .masthead h1:hover,.masthead h1:focus{border-color:var(--faint)}
+  .spec{font:500 11px var(--font-m);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);outline:none;border-bottom:1px dashed transparent;cursor:text;display:inline-block;min-height:14px}
+  .spec[contenteditable="false"]{cursor:default;border-color:transparent!important}
+  .spec:hover,.spec:focus{border-color:var(--faint);color:#b9b7b1}
+  .mh-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px;flex:none}
+  .mh-count{font:500 10px var(--font-m);letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+
+  .btn{display:inline-flex;align-items:center;gap:10px;font:600 12px var(--font-d);letter-spacing:.12em;text-transform:uppercase;padding:13px 20px;border:1px solid transparent;border-radius:var(--radius);cursor:pointer;transition:.15s}
+  .btn.accent{background:var(--orange);color:#1a0d05}
+  .btn.accent:hover{filter:brightness(1.09);transform:translateY(-1px)}
+  .btn.ghost{background:transparent;border-color:var(--line);color:#c9c7c1}
+  .btn.ghost:hover{border-color:var(--muted);color:var(--text);background:var(--bg2)}
+  .btn.small{padding:8px 12px;font-size:10px}
+  .btn.danger:hover{border-color:var(--danger);color:var(--danger)}
+  .icon-btn{width:34px;height:34px;display:grid;place-items:center;background:none;border:1px solid var(--line);color:var(--muted);cursor:pointer;border-radius:var(--radius);transition:.13s}
+  .icon-btn:hover{color:var(--text);border-color:var(--muted)}
+  .kbd{font:600 10px var(--font-m);padding:2px 6px;background:rgba(255,255,255,.22);border-radius:2px;color:#241105}
+
+  /* ---------- tally strip ---------- */
+  .tally{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--line)}
+  .stat{padding:20px 20px 18px;border-right:1px solid var(--line);min-width:0}
+  .stat:last-child{border-right:0}
+  .stat .lbl{font:600 9.5px var(--font-m);letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+  .stat .val{font:500 25px/1.1 var(--font-m);margin-top:10px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stat .foot{margin-top:8px;font:500 9.5px var(--font-m);color:var(--faint);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  /* ---------- history ribbon ---------- */
+  .ribbon{position:relative;padding:26px 0 8px;border-bottom:1px solid var(--line)}
+  .rb-canvas{position:relative;height:70px;margin:0 2px}
+  .rb-base{position:absolute;left:0;right:0;bottom:18px;height:1px;background:var(--line)}
+  .rb-grid{position:absolute;bottom:18px;width:1px;height:40px;background:var(--line-soft)}
+  .rb-month{position:absolute;bottom:0;font:500 9px var(--font-m);letter-spacing:.14em;color:var(--faint)}
+  .rb-empty{position:absolute;inset:0;display:grid;place-items:center;font:500 10px var(--font-m);color:var(--faint);letter-spacing:.2em;text-transform:uppercase}
+  .tick{position:absolute;bottom:18px;width:2px;transform:translateX(-1px);transform-origin:bottom;background:var(--orange);cursor:pointer;transition:transform .14s}
+  .tick:hover{transform:translateX(-1px) scaleY(1.18)}
+  .tick.off{background:var(--steel);opacity:.7}
+
+  #tip{position:fixed;z-index:80;background:#1d1f24;border:1px solid var(--line);padding:9px 13px;font:500 11px/1.7 var(--font-m);pointer-events:none;opacity:0;transform:translate(-50%,-100%);transition:opacity .12s;white-space:nowrap;border-radius:var(--radius)}
+  #tip.on{opacity:1}
+  #tip.below{transform:translate(-50%,0)}
+  #tip b{color:var(--orange);font-weight:600}
+  #tip .tl{color:var(--muted)}
+
+  /* ---------- controls ---------- */
+  .controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:16px 0;border-bottom:1px solid var(--line)}
+  .chip{font:600 10px var(--font-m);letter-spacing:.12em;text-transform:uppercase;padding:8px 11px;background:none;border:1px solid var(--line);color:var(--muted);cursor:pointer;border-radius:var(--radius);transition:.13s;display:inline-flex;align-items:center;gap:5px}
+  .chip:hover{color:var(--text);border-color:var(--faint)}
+  .chip.on{color:var(--orange);border-color:rgba(255,92,26,.6);background:var(--orange-dim)}
+  .chip .n{color:var(--faint)}
+  .chip.on .n{color:rgba(255,92,26,.75)}
+  /* fleet chips: selector + QR button in one unit */
+  .carchip{display:inline-flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:.13s}
+  .carchip .cmain{font:600 10px var(--font-m);letter-spacing:.12em;text-transform:uppercase;padding:8px 11px;background:none;border:0;color:var(--muted);cursor:pointer;transition:.13s}
+  .carchip .cqr{width:30px;display:grid;place-items:center;background:none;border:0;border-left:1px solid var(--line);color:var(--faint);cursor:pointer;transition:.13s}
+  .carchip .cqr:hover{color:var(--text)}
+  .carchip:hover{border-color:var(--faint)}
+  .carchip .cmain:hover{color:var(--text)}
+  .carchip.on{border-color:rgba(255,92,26,.6);background:var(--orange-dim)}
+  .carchip.on .cmain{color:var(--orange)}
+  .carchip.on .cqr{color:rgba(255,92,26,.8);border-left-color:rgba(255,92,26,.35)}
+  .ifill{fill:currentColor;stroke:none}
+  .controls .right{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .sel{background:#131417;border:1px solid var(--line);color:var(--text);font:500 12px var(--font-m);padding:8px 10px;border-radius:var(--radius);cursor:pointer;color-scheme:dark}
+  .search{position:relative}
+  .search .ic{position:absolute;left:9px;top:50%;translate:0 -50%;width:13px;height:13px;color:var(--faint);pointer-events:none}
+  .search input{background:#131417;border:1px solid var(--line);color:var(--text);font:500 12px var(--font-m);padding:8px 10px 8px 28px;border-radius:var(--radius);width:210px;outline:none;transition:border .13s}
+  .search input:focus{border-color:rgba(255,92,26,.6)}
+  #sortIc{transition:transform .2s}
+  #sortIc.asc{transform:rotate(180deg)}
+
+  /* ---------- ledger ---------- */
+  #ledger[data-view="car"]{--cols:52px 104px 148px 1fr 1.2fr 92px 96px 76px 30px}
+  #ledger[data-view="all"]{--cols:52px 116px 100px 136px .9fr 1fr 86px 92px 30px}
+  #ledger{padding-bottom:40px;min-height:340px}
+  .thead{display:grid;grid-template-columns:var(--cols);gap:0 14px;padding:12px 8px 10px;border-bottom:1px solid var(--line)}
+  .thead span{font:600 9px var(--font-m);letter-spacing:.18em;text-transform:uppercase;color:var(--faint)}
+  .gdiv{display:flex;align-items:baseline;gap:14px;padding:26px 8px 10px}
+  .gdiv .gm{font:600 12px var(--font-d);letter-spacing:.2em;text-transform:uppercase;flex:none}
+  .gdiv .gl{flex:1;height:1px;background:var(--line-soft)}
+  .gdiv .gs{font:500 10px var(--font-m);letter-spacing:.12em;color:var(--faint);text-transform:uppercase;flex:none}
+  .entry{border-bottom:1px solid var(--line-soft)}
+  .entry.reveal{animation:rise .5s cubic-bezier(.2,.7,.3,1) both}
+  @keyframes rise{from{opacity:0;transform:translateY(8px)}}
+  .row{display:grid;grid-template-columns:var(--cols);gap:0 14px;align-items:center;padding:15px 8px;cursor:pointer;transition:background .13s,box-shadow .13s}
+  .row:hover,.entry.open .row{background:var(--bg2);box-shadow:inset 2px 0 0 var(--orange)}
+  .entry.flash .row{animation:flash 1.3s ease both}
+  @keyframes flash{0%{background:rgba(255,92,26,.18)}100%{background:transparent}}
+  .c-idx{font:500 11px var(--font-m);color:var(--faint)}
+  .c-date .d{display:block;font:500 12.5px var(--font-m)}
+  .c-date .wd{display:block;font:500 9px var(--font-m);color:var(--faint);letter-spacing:.18em;margin-top:3px}
+  .c-type{display:flex;align-items:center;gap:8px;font:600 10.5px var(--font-m);letter-spacing:.14em;text-transform:uppercase;white-space:nowrap}
+  .c-type .mk{width:8px;height:8px;flex:none}
+  .c-type.on .mk{background:var(--orange)}
+  .c-type.off{color:#c9c7c1}
+  .c-type.off .mk{background:var(--steel)}
+  .c-car{font:500 12.5px var(--font-m);color:var(--steel);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .c-who{font:500 14px var(--font-d)}
+  .c-venue{font:400 13px var(--font-d);color:#b9b7b1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .c-time{font:500 12.5px var(--font-m);white-space:nowrap}
+  .c-time .lp{color:var(--muted);font-size:11px}
+  .c-best{font:500 12.5px var(--font-m);white-space:nowrap}
+  .c-best.pb{color:var(--orange)}
+  .c-eng{font:500 12px var(--font-m);color:var(--muted)}
+  .c-chev{color:var(--faint);display:grid;place-items:center}
+  .c-chev .ic{transition:transform .25s}
+  .entry.open .c-chev{color:var(--orange)}
+  .entry.open .c-chev .ic{transform:rotate(180deg)}
+
+  .detail{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s cubic-bezier(.2,.7,.3,1)}
+  .entry.open .detail{grid-template-rows:1fr}
+  .detail-in{overflow:hidden;min-height:0;display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start;padding:0 8px 0 74px}
+  .entry.open .detail-in{padding-bottom:22px}
+  .detail .notes{flex:1 1 340px;max-width:640px;font:400 14.5px/1.65 var(--font-d);color:#cfcdc7;padding-top:4px;white-space:pre-wrap}
+  .detail .notes .dim{color:var(--faint)}
+  .detail .meta{display:flex;flex-direction:column;gap:7px;padding-top:7px;font:500 10.5px var(--font-m);letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+  .detail .meta b{color:var(--text);font-weight:600}
+  .d-actions{margin-left:auto;display:flex;gap:8px;padding-top:4px}
+
+  .empty{padding:90px 20px;text-align:center}
+  .empty .mk-lg{width:14px;height:14px;background:var(--orange);margin:0 auto 24px}
+  .empty h3{font:600 22px var(--font-d);letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px}
+  .empty p{color:var(--muted);max-width:460px;margin:0 auto 28px;font-size:14px}
+  .empty .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+  /* ---------- footer ---------- */
+  .foot{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:26px 0 70px;flex-wrap:wrap;border-top:1px solid var(--line-soft)}
+  .foot .note{font:500 10px var(--font-m);color:var(--faint);letter-spacing:.12em;text-transform:uppercase}
+  .foot .note b{color:var(--muted)}
+  .foot .acts{display:flex;gap:8px;flex-wrap:wrap}
+
+  /* ---------- slide-over form panel ---------- */
+  #scrim{position:fixed;inset:0;background:rgba(8,9,10,.55);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:55}
+  #scrim.on{opacity:1;pointer-events:auto}
+  .panel{position:fixed;top:0;right:0;height:100dvh;width:min(460px,100vw);background:#16171a;border-left:1px solid var(--line);transform:translateX(102%);transition:transform .38s cubic-bezier(.22,.8,.24,1);z-index:60;display:flex;flex-direction:column}
+  .panel.open{transform:none;box-shadow:-30px 0 60px rgba(0,0,0,.45)}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;padding:22px 24px;border-bottom:1px solid var(--line);flex:none}
+  .panel-title{font:700 18px var(--font-d);letter-spacing:.06em;text-transform:uppercase;margin-top:8px}
+  .panel-body{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:20px}
+  .lbl{display:block;font:600 9.5px var(--font-m);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .lbl em{font-style:normal;color:var(--faint);text-transform:none;letter-spacing:.05em}
+  .field input,.field textarea,.field select{width:100%;background:#111214;border:1px solid var(--line);color:var(--text);font:400 14px var(--font-d);padding:11px 12px;border-radius:var(--radius);outline:none;transition:border .13s;color-scheme:dark}
+  .field input:focus,.field textarea:focus{border-color:rgba(255,92,26,.65)}
+  .field.invalid input{border-color:var(--danger)}
+  .field textarea{min-height:110px;resize:vertical;line-height:1.55}
+  .with-unit{position:relative}
+  .with-unit input{padding-right:48px}
+  .with-unit .unit{position:absolute;right:12px;bottom:12px;font:500 11px var(--font-m);color:var(--faint);pointer-events:none}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px 12px}
+  .grid2 .span2{grid-column:1/-1}
+  .type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .tchip{font:600 10px var(--font-m);letter-spacing:.1em;text-transform:uppercase;padding:11px 6px;background:#111214;border:1px solid var(--line);color:var(--muted);cursor:pointer;border-radius:var(--radius);transition:.13s;display:flex;align-items:center;justify-content:center;gap:6px}
+  .tchip:hover{color:var(--text)}
+  .tchip.on{color:var(--orange);border-color:rgba(255,92,26,.65);background:var(--orange-dim)}
+  .tchip .ck{width:11px;height:11px;display:none}
+  .tchip.on .ck{display:block}
+  .people{display:flex;flex-wrap:wrap;gap:8px}
+  .people-hint{font:400 12px var(--font-d);color:var(--faint);width:100%}
+  .add-person{display:flex;gap:8px;margin-top:10px}
+  .add-person input{flex:1}
+  .panel-foot{padding:16px 24px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none}
+  .form-error{font:500 11px var(--font-m);color:var(--danger);letter-spacing:.04em;flex:1;min-width:0}
+  .foot-btns{display:flex;gap:10px;flex:none}
+
+  /* ---------- modals & toast ---------- */
+  .modal-backdrop{position:fixed;inset:0;z-index:70;background:rgba(8,9,10,.6);display:grid;place-items:center;opacity:0;pointer-events:none;transition:.2s;padding:20px}
+  .modal-backdrop.on{opacity:1;pointer-events:auto}
+  .modal{width:min(400px,100%);background:#18191d;border:1px solid var(--line);padding:24px;border-radius:3px;transform:translateY(8px);transition:.2s}
+  .modal-backdrop.on .modal{transform:none}
+  .modal p{margin:14px 0 4px;color:var(--muted);font-size:14px;line-height:1.6}
+  .m-btns{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+  .solid-danger{background:var(--danger);color:#fff;border:0;font:600 11px var(--font-d);letter-spacing:.1em;text-transform:uppercase;padding:11px 18px;cursor:pointer;border-radius:var(--radius)}
+  .solid-danger:hover{filter:brightness(1.1)}
+  .cform{margin-top:14px;display:flex;flex-direction:column;gap:14px;text-align:left}
+
+  .qr-modal{width:min(440px,100%);text-align:center}
+  .qr-name{font:700 22px var(--font-d);text-transform:uppercase;margin-top:10px}
+  .qr-spec{font:500 10.5px var(--font-m);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:4px;min-height:14px}
+  .qr-box{width:232px;margin:18px auto 12px;background:#fff;padding:12px;border-radius:3px}
+  .qr-box svg{display:block;width:100%;height:auto}
+  .qr-err{font:500 12px var(--font-m);color:var(--danger);padding:40px 0}
+  .qr-url{font:500 10.5px/1.6 var(--font-m);color:var(--muted);word-break:break-all;margin:0 4px 14px}
+  .qr-warn{font:400 12.5px/1.55 var(--font-d);color:var(--warn);background:rgba(224,163,78,.08);border:1px solid rgba(224,163,78,.35);padding:10px 12px;margin-bottom:14px;text-align:left;border-radius:2px}
+  .qr-tip{font:400 12px/1.55 var(--font-d);color:var(--faint);text-align:left;margin-top:14px}
+  .qr-btns{flex-wrap:wrap;justify-content:flex-start;gap:8px}
+  .qr-btns .spacer{flex:1}
+
+  #toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);background:#1c1e23;border:1px solid var(--line);border-left:2px solid var(--orange);color:var(--text);font:500 12px var(--font-m);padding:12px 18px;opacity:0;pointer-events:none;transition:.25s;z-index:90;border-radius:var(--radius);max-width:calc(100vw - 40px)}
+  #toast.on{opacity:1;transform:translate(-50%,0)}
+
+  .ic{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+  /* ---------- QR print sheet (only visible when printing codes) ---------- */
+  #qrSheet{display:none}
+  @media print{
+    body{background:#fff;color:#111;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body::before,.stripe,.controls,.foot,.panel,#scrim,.modal-backdrop,#toast,#tip,.c-chev,.mh-right{display:none!important}
+    .masthead{border-color:#bbb}.masthead h1{color:#000}
+    .overline,.spec{color:#555!important}
+    .tally{border-color:#bbb}.stat{border-color:#ddd}
+    .stat .lbl{color:#555}.stat .val{color:#000}.stat .foot{color:#777}
+    .thead{border-color:#bbb}.thead span{color:#666}
+    .entry{border-color:#ddd}
+    .c-venue,.c-eng,.c-type.off{color:#333}
+    .c-type.on .mk{background:#ff5c1a}.c-type.off .mk{background:#888}
+    .gdiv .gs,.gdiv .gl,.c-idx,.c-date .wd{color:#777}
+    .detail{grid-template-rows:1fr}.detail .notes{color:#222}.d-actions{display:none}
+
+    body.print-qr .stripe,body.print-qr .wrap,body.print-qr #panel,body.print-qr #scrim,
+    body.print-qr .modal-backdrop,body.print-qr #toast,body.print-qr #tip{display:none!important}
+    body.print-qr #qrSheet{display:grid;grid-template-columns:repeat(2,1fr);gap:12mm;max-width:180mm;margin:0 auto}
+    .qcard{border:1.5pt solid #000;padding:8mm 6mm;text-align:center;page-break-inside:avoid;color:#000}
+    .qcard .qname{font:700 15pt var(--font-d);text-transform:uppercase}
+    .qcard .qspec{font:500 8.5pt var(--font-m);color:#444;margin-top:2mm}
+    .qcard .qsvg{width:52mm;height:52mm;margin:5mm auto 3mm}
+    .qcard .qsvg svg{width:100%;height:100%}
+    .qcard .qurl{font:500 7pt var(--font-m);color:#333;word-break:break-all}
+    .qcard .qhint{font:600 7.5pt var(--font-m);letter-spacing:.15em;text-transform:uppercase;margin-top:3mm}
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:960px){
+    .masthead{flex-direction:column;align-items:flex-start}
+    .mh-right{align-items:flex-start}
+    .tally{grid-template-columns:repeat(2,1fr)}
+    .stat{border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+    .stat:nth-child(2n){border-right:0}
+    .stat:last-child{border-bottom:0}
+    .thead{display:none}
+    #ledger[data-view="car"]{--cols:none}
+    #ledger[data-view="all"]{--cols:none}
+    #ledger[data-view="car"] .row{grid-template-columns:1fr auto;grid-template-areas:"date type" "who who" "venue venue" "time eng" "best best";row-gap:8px}
+    #ledger[data-view="all"] .row{grid-template-columns:1fr auto;grid-template-areas:"date type" "car car" "who who" "venue venue" "time eng" "best best";row-gap:8px}
+    .c-idx,.c-chev,.c-eng{display:none}
+    .c-date{grid-area:date}.c-type{grid-area:type;justify-self:end}
+    .c-car{grid-area:car}.c-who{grid-area:who}.c-venue{grid-area:venue}
+    .c-time{grid-area:time;justify-self:start}
+    .c-best{grid-area:best}
+    .c-best::before{content:"BEST LAP  ";color:var(--faint);font-size:9px;letter-spacing:.18em}
+    .detail-in{padding-left:8px}
+    .controls .right{margin-left:0;width:100%}
+    .search{flex:1}
+    .search input{width:100%}
+    .panel{width:100vw}
+  }
+</style>
+</head>
+<body>
+
+<!-- icon sprite -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 21V9M7 14l5-5 5 5M4 3h16"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-sort" viewBox="0 0 24 24"><path d="M12 5v14M12 19l-4-4M12 19l4-4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 7"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M3 3h8v8H3V3zm2 2v4h4V5H5zm16-2h-8v8h8V3zm-2 2v4h-4V5h4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm8-2v3h3v-3h-3zm5 0v3h3v-3h-3zm-5 5v3h3v-3h-3zm5 0v3h3v-3h-3zm2.5-5h3v3h-3v-3zm-10 2.5h3v3h-3v-3z"/></symbol>
+</svg>
+
+<div class="stripe"></div>
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <div class="overline">Vehicle Log Book — Radical Sportscars</div>
+      <h1 id="carName" contenteditable spellcheck="false" title="Click to rename this car"></h1>
+      <span id="carSpec" class="spec" contenteditable spellcheck="false" title="Click to edit"></span>
+    </div>
+    <div class="mh-right">
+      <button class="btn accent" data-action="new"><svg class="ic"><use href="#i-plus"/></svg>New entry<span class="kbd">N</span></button>
+      <span class="mh-count" id="mhCount"></span>
+    </div>
+  </header>
+
+  <section class="tally" aria-label="Statistics">
+    <div class="stat"><div class="lbl">Engine hours</div><div class="val" id="v-engine">—</div><div class="foot" id="k-engine">meter reading</div></div>
+    <div class="stat"><div class="lbl">Track time</div><div class="val" id="v-time">—</div><div class="foot">logged in minutes · shown in hours</div></div>
+    <div class="stat"><div class="lbl">Sessions</div><div class="val" id="v-sessions">—</div><div class="foot">on-track outings</div></div>
+    <div class="stat"><div class="lbl">Best lap</div><div class="val" id="v-lap">—</div><div class="foot" id="k-lap">no lap timed yet</div></div>
+    <div class="stat"><div class="lbl">Since service</div><div class="val" id="v-since">—</div><div class="foot" id="k-since">last maintenance</div></div>
+    <div class="stat"><div class="lbl">Last outing</div><div class="val" id="v-last">—</div><div class="foot" id="k-last">—</div></div>
+  </section>
+
+  <section class="ribbon" aria-label="History ribbon">
+    <div class="rb-canvas" id="rbCanvas"></div>
+  </section>
+
+  <section class="controls" aria-label="Filters">
+    <div id="carChips" style="display:contents"></div>
+    <div id="typeChips" style="display:contents"></div>
+    <div class="right">
+      <select class="sel" id="pf" aria-label="Filter by person"></select>
+      <div class="search">
+        <svg class="ic"><use href="#i-search"/></svg>
+        <input id="q" type="text" placeholder="Search notes, venue…" aria-label="Search">
+      </div>
+      <button class="chip" data-action="sort" title="Toggle sort order">
+        <svg class="ic" id="sortIc" style="width:12px;height:12px"><use href="#i-sort"/></svg><span id="sortLbl">Newest first</span>
+      </button>
+    </div>
+  </section>
+
+  <main id="ledger" data-view="car" aria-live="polite"></main>
+
+  <footer class="foot">
+    <div class="note"><b>N</b> — new entry · stored locally in this browser · <b>QR</b> — the ⌗ button on each car's chip</div>
+    <div class="acts">
+      <button class="btn ghost small" data-action="export-csv"><svg class="ic"><use href="#i-down"/></svg>CSV</button>
+      <button class="btn ghost small" data-action="export-json"><svg class="ic"><use href="#i-down"/></svg>JSON</button>
+      <button class="btn ghost small" data-action="import"><svg class="ic"><use href="#i-up"/></svg>Import</button>
+      <button class="btn ghost small danger" data-action="clear-all"><svg class="ic"><use href="#i-trash"/></svg>Clear</button>
+    </div>
+  </footer>
+</div>
+
+<!-- slide-over entry form -->
+<aside class="panel" id="panel" aria-hidden="true">
+  <div class="panel-head">
+    <div>
+      <div class="overline" id="panelKind">New entry</div>
+      <div class="panel-title" id="panelTitle">Log an entry</div>
+    </div>
+    <button class="icon-btn" data-action="panel-close" aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button>
+  </div>
+  <div class="panel-body">
+    <div class="field"><label class="lbl" for="f-date">When</label><input type="date" id="f-date"></div>
+
+    <div class="field" id="carField"><span class="lbl">Which Radical</span><div class="people" id="f-cars"></div></div>
+
+    <div class="field"><span class="lbl">What did you do</span><div class="type-grid" id="f-types"></div></div>
+
+    <div class="field" id="shopField" hidden>
+      <label class="lbl" for="f-shop">Where was the maintenance performed</label>
+      <input id="f-shop" placeholder="e.g. RPM Race Shop / home garage">
+    </div>
+
+    <div class="field" id="personField">
+      <span class="lbl">Who did it</span>
+      <div class="people" id="f-people"></div>
+      <div class="add-person" id="addPersonRow" hidden>
+        <input id="f-newperson" placeholder="Name — driver, crew, or the shop">
+        <button class="btn ghost small" data-action="person-commit">Add</button>
+      </div>
+    </div>
+
+    <div class="field"><label class="lbl" for="f-venue">Venue / track <em>— optional</em></label>
+      <input id="f-venue" list="venueList" placeholder="e.g. Shannonville Motorsport Park" autocomplete="off">
+      <datalist id="venueList"></datalist>
+    </div>
+
+    <div class="grid2">
+      <div class="field with-unit"><label class="lbl" for="f-mins">Track time <em>— min</em></label><input id="f-mins" type="number" min="0" step="1" placeholder="0"><span class="unit">min</span></div>
+      <div class="field"><label class="lbl" for="f-laps">Laps / runs</label><input id="f-laps" type="number" min="0" step="1"></div>
+      <div class="field span2"><label class="lbl" for="f-lap">Best lap <em>— e.g. 1:28.7 or 88.7</em></label><input id="f-lap" type="text" inputmode="decimal" placeholder="1:28.7" autocomplete="off"></div>
+      <div class="field with-unit"><label class="lbl" for="f-engine">Engine meter <em>— at end</em></label><input id="f-engine" type="number" min="0" step="0.1"><span class="unit">h</span></div>
+      <div class="field with-unit"><label class="lbl" for="f-cost">Cost</label><input id="f-cost" type="number" min="0" step="1"><span class="unit">$</span></div>
+      <div class="field with-unit"><label class="lbl" for="f-air">Air temp</label><input id="f-air" type="number" step="0.5" placeholder="—"><span class="unit">°C</span></div>
+      <div class="field with-unit"><label class="lbl" for="f-track">Track temp</label><input id="f-track" type="number" step="0.5" placeholder="—"><span class="unit">°C</span></div>
+    </div>
+
+    <div class="field"><label class="lbl" for="f-notes">Notes</label>
+      <textarea id="f-notes" placeholder="What happened, what was done, tire pressures, findings…"></textarea>
+    </div>
+  </div>
+  <div class="panel-foot">
+    <div class="form-error" id="formError"></div>
+    <div class="foot-btns">
+      <button class="btn ghost small" data-action="panel-cancel">Cancel</button>
+      <button class="btn accent" data-action="save-entry">Save entry</button>
+    </div>
+  </div>
+</aside>
+<div id="scrim" data-action="panel-close"></div>
+
+<!-- confirm modal -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="overline" id="mTitle"></div>
+    <p id="mMsg"></p>
+    <div class="m-btns">
+      <button class="btn ghost small" data-action="modal-cancel">Cancel</button>
+      <button class="solid-danger" data-action="modal-yes" id="mYes">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- add-car modal -->
+<div class="modal-backdrop" id="carModal">
+  <div class="modal">
+    <div class="overline">Fleet</div>
+    <p id="carModalMsg"></p>
+    <div class="cform">
+      <div class="field"><label class="lbl" for="nc-name">Name</label><input id="nc-name" placeholder="e.g. SR3 #042"></div>
+      <div class="field"><label class="lbl" for="nc-spec">Details — optional</label><input id="nc-spec" placeholder="e.g. RPE 1340cc · 2019 · chassis no."></div>
+    </div>
+    <div class="m-btns">
+      <button class="btn ghost small" data-action="car-modal-cancel">Cancel</button>
+      <button class="btn accent small" data-action="car-save">Add car</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR modal -->
+<div class="modal-backdrop" id="qrModal">
+  <div class="modal qr-modal">
+    <div class="overline">Scan with a phone — opens this car directly</div>
+    <div class="qr-name" id="qrCarName"></div>
+    <div class="qr-spec" id="qrCarSpec"></div>
+    <div class="qr-box" id="qrBox"></div>
+    <div class="qr-url" id="qrUrl"></div>
+    <div class="qr-warn" id="qrWarn" hidden>
+      This page is open as a local file — a phone camera can't open a <b>file://</b> address.
+      Host this HTML file anywhere (GitHub Pages, Netlify Drop… takes a minute), then paste the hosted
+      address below and the code will point there.
+    </div>
+    <div class="field" style="text-align:left">
+      <label class="lbl" for="qrBase">Address encoded in the QR</label>
+      <input id="qrBase" type="url" spellcheck="false" placeholder="https://your-site.example/logbook.html">
+    </div>
+    <div class="qr-tip">Tip: the log book lives per device — log on the phone at the track, then use <b>Export → Import</b> to merge into your main copy.</div>
+    <div class="m-btns qr-btns">
+      <button class="btn ghost small" data-action="qr-print"><svg class="ic"><use href="#i-down"/></svg>Print this code</button>
+      <button class="btn ghost small" data-action="qr-print-all">Print all cars</button>
+      <span class="spacer"></span>
+      <button class="btn ghost small danger" data-action="car-delete">Delete car</button>
+      <button class="btn ghost small" data-action="qr-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="tip"></div>
+<div id="toast"></div>
+<div id="qrSheet"></div>
+<input type="file" id="fileImport" accept="application/json,.json" hidden>
+
+<script>
+'use strict';
+/* ================= constants ================= */
+const KEY = 'radical-logbook-v1';
+const TYPES = {
+  lapping:     {label:'Lapping',     onTrack:true},
+  testing:     {label:'Testing',     onTrack:true},
+  race:        {label:'Race',        onTrack:true},
+  autoslalom:  {label:'Autoslalom',  onTrack:true},
+  maintenance: {label:'Maintenance', onTrack:false},
+  other:       {label:'Other',       onTrack:false}
+};
+const VENUE_SUGGESTIONS = [
+  'Canadian Tire Motorsport Park','Shannonville Motorsport Park','Calabogie Motorsport Park',
+  'Circuit Mont-Tremblant','ICAR Complex — Mirabel','Autodrome St-Eustache',
+  'Watkins Glen International','Circuit Paul Armagnac','Snetterton Circuit'
+];
+const SAMPLE = {
+  cars: [
+    {id:'sr3x42', name:'SR3 #042', spec:'RPE 1340cc · 2019 · chassis no. 042'},
+    {id:'sr1x10', name:'SR1 #010', spec:'RPE 1500cc · 2016'}
+  ],
+  people: ['Alex','Sophie','RPM Race Shop'],
+  entries: [
+    {carId:'sr3x42',date:'2024-09-14',type:'maintenance',person:'RPM Race Shop',venue:'',shop:'RPM Race Shop',minutes:240,cost:640,engine:118.0,notes:'Annual tech inspection. Brake fluid flush (Motul RBF 660), new plugs, compression check all good. Suspension greased, everything torqued to spec.'},
+    {carId:'sr3x42',date:'2024-09-21',type:'testing',person:'Alex',venue:'Shannonville Motorsport Park (Nelson)',minutes:120,laps:41,engine:120.1,airTemp:17,trackTemp:26,bestLap:59.4,notes:'Shakedown after the annual. Car feels tight. Slight understeer into the final corner — try a quarter turn more front bar.'},
+    {carId:'sr3x42',date:'2024-10-05',type:'lapping',person:'Sophie',venue:'Canadian Tire Motorsport Park',minutes:90,laps:30,engine:121.4,airTemp:12,trackTemp:15,bestLap:94.1,notes:'Sophie\u2019s first time on the long track. Building pace steadily.'},
+    {carId:'sr1x10',date:'2024-10-12',type:'maintenance',person:'Sophie',venue:'',shop:'Home garage',minutes:150,cost:175,engine:87.5,notes:'SR1 storage prep: oil + filter, fuel stabilizer, battery on tender, pressures up to 30 psi.'},
+    {carId:'sr3x42',date:'2024-10-19',type:'autoslalom',person:'Alex',venue:'ICAR Complex — Mirabel',minutes:48,laps:7,engine:121.9,airTemp:8,trackTemp:11,bestLap:44.8,notes:'Autoslalom round 5. P2 in class. Cold tires in the morning, much better after heat cycles.'},
+    {carId:'sr3x42',date:'2024-11-02',type:'maintenance',person:'Alex',venue:'',shop:'Home garage',minutes:150,cost:210,notes:'Winter storage prep: oil + filter change, fuel stabilizer, battery on tender, tire pressures up to 30 psi.'},
+    {carId:'sr1x10',date:'2025-04-26',type:'lapping',person:'Alex',venue:'Calabogie Motorsport Park',minutes:150,laps:48,engine:89.9,airTemp:11,trackTemp:14,bestLap:149.7,notes:'SR1 season opener. Fired up first crank after storage.'},
+    {carId:'sr3x42',date:'2025-04-27',type:'lapping',person:'Alex',venue:'Calabogie Motorsport Park',minutes:150,laps:52,engine:124.0,airTemp:11,trackTemp:14,bestLap:139.3,notes:'SR3 season opener. Times within a second of last fall right away.'},
+    {carId:'sr3x42',date:'2025-05-17',type:'race',person:'Sophie',venue:'Circuit Mont-Tremblant',minutes:42,laps:18,engine:125.0,airTemp:19,trackTemp:28,bestLap:91.8,notes:'Race 1 — P3 in class. Clean start, held off pressure in the last five laps.'},
+    {carId:'sr1x10',date:'2025-05-17',type:'race',person:'Sophie',venue:'Circuit Mont-Tremblant',minutes:40,laps:17,engine:91.2,airTemp:19,trackTemp:28,bestLap:155.2,notes:'SR1 race — P5. Long track suits the extra torque.'},
+    {carId:'sr3x42',date:'2025-06-08',type:'lapping',person:'Alex',venue:'Canadian Tire Motorsport Park',minutes:108,laps:36,engine:126.6,airTemp:22,trackTemp:34,bestLap:92.4,notes:'Bedded in new front pads. Much better bite from lap 4 on. Hot pressures 28 all around.'},
+    {carId:'sr3x42',date:'2025-06-21',type:'maintenance',person:'Alex',venue:'',shop:'Home garage',minutes:90,cost:385,notes:'Front pads replaced with a new set. Rotors measured 26.1 mm — within spec. Coolant checked, no leaks.'},
+    {carId:'sr1x10',date:'2025-07-05',type:'autoslalom',person:'Sophie',venue:'ICAR Complex — Mirabel',minutes:54,laps:8,engine:92.0,airTemp:24,trackTemp:33,bestLap:46.1,notes:'Round 7. P1 in class — first win in the SR1! Clean runs all day, no cones.'}
+  ]
+};
+
+/* ================================================================
+   TinyQR — a self-contained QR encoder (byte mode, versions 1-6,
+   error correction L/M). Enough capacity for any reasonable URL
+   (up to 134 characters), with no external dependencies.
+   ================================================================ */
+const TinyQR = (function(){
+  // GF(256) arithmetic
+  const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+  (function(){
+    let x = 1;
+    for (let i = 0; i < 255; i++){ EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 0x100) x ^= 0x11D; }
+    for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+  })();
+  const gmul = (a, b) => (a && b) ? EXP[LOG[a] + LOG[b]] : 0;
+
+  // per-version tables (index = version - 1)
+  const RAW   = [26, 44, 70, 100, 134, 172];   // total codewords
+  const ECC_L = [7, 10, 15, 20, 26, 18];       // ecc codewords per block, level L
+  const ECC_M = [10, 16, 26, 18, 24, 16];      // level M
+  const BLK_L = [1, 1, 1, 1, 1, 2];            // block counts, level L
+  const BLK_M = [1, 1, 1, 2, 2, 4];            // level M
+  const ALIGN = [null, [6,18], [6,22], [6,26], [6,30], [6,34]];
+
+  function rsDivisor(degree){
+    const coefs = [];
+    let root = 1;
+    for (let i = 0; i < degree; i++){ coefs.push(root); root = gmul(root, 2); }
+    return coefs;
+  }
+  function rsRemainder(data, divisor){
+    const res = new Array(divisor.length).fill(0);
+    for (const b of data){
+      const factor = b ^ res.shift();
+      res.push(0);
+      for (let i = 0; i < divisor.length; i++) res[i] ^= gmul(divisor[i], factor);
+    }
+    return res;
+  }
+
+  function encodeBytes(bytes, ver, useM){
+    const raw = RAW[ver - 1];
+    const eccPer = useM ? ECC_M[ver - 1] : ECC_L[ver - 1];
+    const nBlocks = useM ? BLK_M[ver - 1] : BLK_L[ver - 1];
+    const dataLen = raw - eccPer * nBlocks;
+    const capBits = dataLen * 8;
+    const bits = [];
+    const push = (val, len) => { for (let i = len - 1; i >= 0; i--) bits.push((val >>> i) & 1); };
+    push(4, 4);                        // byte mode indicator
+    push(bytes.length, 8);             // char count (versions 1-9)
+    for (const b of bytes) push(b, 8);
+    if (bits.length > capBits) return null;
+    for (let i = 0; i < 4 && bits.length < capBits; i++) bits.push(0);  // terminator
+    while (bits.length % 8 !== 0) bits.push(0);
+    const data = [];
+    for (let i = 0; i < bits.length; i += 8){
+      let b = 0;
+      for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j];
+      data.push(b);
+    }
+    for (let alt = 0xEC; data.length < dataLen; alt ^= 0xEC ^ 0x11) data.push(alt);
+
+    // split into blocks, compute ecc, interleave (Reed-Solomon)
+    const numShort = nBlocks - (raw % nBlocks);
+    const shortLen = Math.floor(raw / nBlocks);
+    const div = rsDivisor(eccPer);
+    const blocks = [];
+    for (let i = 0, k = 0; i < nBlocks; i++){
+      const len = shortLen - eccPer + (i < numShort ? 0 : 1);
+      const dat = data.slice(k, k + len); k += len;
+      const ecc = rsRemainder(dat, div);
+      if (i < numShort) dat.push(0);   // dummy so all blocks align for interleaving
+      blocks.push(dat.concat(ecc));
+    }
+    const out = [];
+    for (let i = 0; i < blocks[0].length; i++){
+      blocks.forEach((blk, j) => {
+        if (i !== shortLen - eccPer || j >= numShort) out.push(blk[i]);
+      });
+    }
+    return out;
+  }
+
+  function drawFormat(set, size, fmtBits, mask){
+    const data = (fmtBits << 3) | mask;
+    let rem = data;
+    for (let i = 0; i < 10; i++) rem = (rem << 1) ^ ((rem >>> 9) * 0x537);
+    const bits = ((data << 10) | rem) ^ 0x5412;
+    const bit = i => ((bits >>> i) & 1) !== 0;
+    for (let i = 0; i <= 5; i++) set(8, i, bit(i));
+    set(8, 7, bit(6)); set(8, 8, bit(7)); set(7, 8, bit(8));
+    for (let i = 9; i < 15; i++) set(14 - i, 8, bit(i));
+    for (let i = 0; i < 8; i++) set(size - 1 - i, 8, bit(i));
+    for (let i = 8; i < 15; i++) set(8, size - 15 + i, bit(i));
+    set(8, size - 8, true);            // dark module
+  }
+
+  function maskBit(m, x, y){
+    switch (m){
+      case 0: return (x + y) % 2 === 0;
+      case 1: return y % 2 === 0;
+      case 2: return x % 3 === 0;
+      case 3: return (x + y) % 3 === 0;
+      case 4: return (Math.floor(x / 3) + Math.floor(y / 2)) % 2 === 0;
+      case 5: return ((x * y) % 2) + ((x * y) % 3) === 0;
+      case 6: return (((x * y) % 2) + ((x * y) % 3)) % 2 === 0;
+      case 7: return (((x * y) % 3) + ((x + y) % 2)) % 2 === 0;
+    }
+    return false;
+  }
+
+  function penalty(mods, size){
+    let result = 0;
+    const runPenalty = (get) => {
+      for (let i = 0; i < size; i++){
+        let color = get(i, 0), run = 1;
+        for (let j = 1; j < size; j++){
+          if (get(i, j) === color){ run++; if (run === 5) result += 3; else if (run > 5) result++; }
+          else { color = get(i, j); run = 1; }
+        }
+      }
+    };
+    runPenalty((y, x) => mods[y][x]);
+    runPenalty((x, y) => mods[y][x]);
+    for (let y = 0; y < size - 1; y++) for (let x = 0; x < size - 1; x++){
+      const c = mods[y][x];
+      if (c === mods[y][x + 1] && c === mods[y + 1][x] && c === mods[y + 1][x + 1]) result += 3;
+    }
+    const pat1 = [1,0,1,1,1,0,1,0,0,0,0], pat2 = [0,0,0,0,0,1,0,1,1,1,1];
+    const finderPenalty = (get) => {
+      for (let i = 0; i < size; i++) for (let j = 0; j <= size - 11; j++){
+        let m1 = true, m2 = true;
+        for (let k = 0; k < 11; k++){
+          const v = get(i, j + k) ? 1 : 0;
+          if (v !== pat1[k]) m1 = false;
+          if (v !== pat2[k]) m2 = false;
+          if (!m1 && !m2) break;
+        }
+        if (m1) result += 40;
+        if (m2) result += 40;
+      }
+    };
+    finderPenalty((y, x) => mods[y][x]);
+    finderPenalty((x, y) => mods[y][x]);
+    let dark = 0;
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) if (mods[y][x]) dark++;
+    const total = size * size;
+    result += Math.max(0, Math.ceil(Math.abs(dark * 20 - total * 10) / total) - 1) * 10;
+    return result;
+  }
+
+  function build(ver, useM, codewords){
+    const size = 17 + 4 * ver;
+    const modules = Array.from({length: size}, () => new Array(size).fill(false));
+    const isFunc  = Array.from({length: size}, () => new Array(size).fill(false));
+    const set = (x, y, d) => { modules[y][x] = d; isFunc[y][x] = true; };
+
+    for (let i = 0; i < size; i++){ set(6, i, i % 2 === 0); set(i, 6, i % 2 === 0); }
+    const finder = (cx, cy) => {
+      for (let dy = -4; dy <= 4; dy++) for (let dx = -4; dx <= 4; dx++){
+        const x = cx + dx, y = cy + dy, d = Math.max(Math.abs(dx), Math.abs(dy));
+        if (x >= 0 && x < size && y >= 0 && y < size) set(x, y, d !== 2 && d !== 4);
+      }
+    };
+    finder(3, 3); finder(size - 4, 3); finder(3, size - 4);
+    drawFormat(set, size, 0, 0);       // reserve format cells
+    const ap = ALIGN[ver];
+    if (ap){
+      const n = ap.length;
+      for (let i = 0; i < n; i++) for (let j = 0; j < n; j++){
+        if ((i === 0 && j === 0) || (i === 0 && j === n - 1) || (i === n - 1 && j === 0)) continue;
+        const cx = ap[j], cy = ap[i];
+        for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++)
+          set(cx + dx, cy + dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+      }
+    }
+    // place data in the zigzag
+    let bi = 0;
+    const totalBits = codewords.length * 8;
+    for (let right = size - 1; right >= 1; right -= 2){
+      if (right === 6) right = 5;
+      for (let vert = 0; vert < size; vert++){
+        for (let j = 0; j < 2; j++){
+          const x = right - j;
+          const upward = ((right + 1) & 2) === 0;
+          const y = upward ? size - 1 - vert : vert;
+          if (!isFunc[y][x] && bi < totalBits){
+            modules[y][x] = ((codewords[bi >>> 3] >>> (7 - (bi & 7))) & 1) !== 0;
+            bi++;
+          }
+        }
+      }
+    }
+    // pick the best mask
+    const fmtBits = useM ? 0 : 1;
+    let bestMask = 0, bestPen = Infinity;
+    for (let m = 0; m < 8; m++){
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++)
+        if (!isFunc[y][x] && maskBit(m, x, y)) modules[y][x] = !modules[y][x];
+      drawFormat(set, size, fmtBits, m);
+      const p = penalty(modules, size);
+      if (p < bestPen){ bestPen = p; bestMask = m; }
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++)
+        if (!isFunc[y][x] && maskBit(m, x, y)) modules[y][x] = !modules[y][x];
+    }
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++)
+      if (!isFunc[y][x] && maskBit(bestMask, x, y)) modules[y][x] = !modules[y][x];
+    drawFormat(set, size, fmtBits, bestMask);
+    return {size, modules};
+  }
+
+  function make(text){
+    const bytes = Array.from(new TextEncoder().encode(String(text)));
+    for (const useM of [true, false]){
+      for (let v = 1; v <= 6; v++){
+        const cw = encodeBytes(bytes, v, useM);
+        if (cw) return build(v, useM, cw);
+      }
+    }
+    return null;   // content too long
+  }
+  return {make};
+})();
+
+function qrToSvg(qr, quiet){
+  quiet = quiet == null ? 4 : quiet;
+  let cells = '';
+  for (let y = 0; y < qr.size; y++) for (let x = 0; x < qr.size; x++)
+    if (qr.modules[y][x]) cells += `<rect x="${x + quiet}" y="${y + quiet}" width="1" height="1"/>`;
+  const dim = qr.size + quiet * 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${dim} ${dim}" shape-rendering="crispEdges">` +
+         `<rect width="100%" height="100%" fill="#fff"/><g fill="#000">${cells}</g></svg>`;
+}
+
+/* ================= helpers ================= */
+const $  = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const shortId = () => 'c' + Math.random().toString(36).slice(2,8);
+const pad3 = n => String(n).padStart(3,'0');
+const pad2 = n => String(n).padStart(2,'0');
+const num = v => { if(v===''||v==null) return null; const n=parseFloat(v); return isFinite(n)&&n>=0 ? n : null; };
+const numAny = v => { if(v===''||v==null) return null; const n=parseFloat(v); return isFinite(n) ? n : null; };
+const todayISO = () => { const d=new Date(); return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; };
+const isoOf = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+const byDateAsc = (a,b) => a.date===b.date ? (a.createdAt||0)-(b.createdAt||0) : (a.date<b.date?-1:1);
+const icon = n => `<svg class="ic"><use href="#i-${n}"/></svg>`;
+
+function fmtMin(m){
+  m = Number(m); if(!isFinite(m)) return '—';
+  m = Math.round(m*10)/10;
+  if(m < 60) return (m % 1 === 0 ? m : m.toFixed(1)) + ' min';
+  const h = Math.floor(m/60), mm = Math.round(m - h*60);
+  if(mm === 60) return (h+1) + 'h';
+  return mm ? `${h}h ${pad2(mm)}m` : `${h}h`;
+}
+function fmtLap(sec){
+  if (sec == null || !isFinite(sec) || sec <= 0) return '—';
+  const cs = Math.round(sec * 100);
+  const m = Math.floor(cs / 6000), rem = cs % 6000;
+  const frac = rem % 100 ? '.' + String(rem % 100).padStart(2,'0') : '';
+  const ss = String(Math.floor(rem / 100)).padStart(2,'0') + frac;
+  return m ? `${m}:${ss}` : `${Math.floor(rem/100)}${frac}`;
+}
+function parseLap(str){
+  str = String(str || '').trim();
+  if (!str) return null;
+  let m = str.match(/^(\d+):([0-5]?\d(?:\.\d{1,3})?)$/);
+  if (m) return parseInt(m[1],10) * 60 + parseFloat(m[2]);
+  m = str.match(/^(\d+(?:\.\d{1,3})?)$/);
+  if (m) return parseFloat(m[1]);
+  return NaN;
+}
+
+/* ================= state ================= */
+function normalizeEntry(e){
+  if(!e || typeof e !== 'object' || !e.date) return null;
+  let minutes = num(e.minutes);
+  if (minutes == null){
+    const hrs = num(e.hours);
+    if (hrs != null) minutes = Math.round(hrs * 60);   // migrate legacy hour-based data
+  }
+  return {
+    id: e.id || uid(),
+    createdAt: e.createdAt || Date.now(),
+    carId: e.carId || '',
+    date: e.date,
+    type: TYPES[e.type] ? e.type : 'other',
+    person: e.person || '—',
+    venue: e.venue || '',
+    shop: e.shop || '',
+    minutes,
+    laps: num(e.laps),
+    engine: num(e.engine),
+    airTemp: numAny(e.airTemp),
+    trackTemp: numAny(e.trackTemp),
+    bestLap: numAny(e.bestLap),
+    cost: num(e.cost),
+    notes: e.notes || ''
+  };
+}
+function migrate(s){
+  s.cars = (Array.isArray(s.cars) ? s.cars : [])
+    .filter(c => c && typeof c === 'object')
+    .map(c => ({id: c.id || shortId(), name: c.name || 'Radical', spec: c.spec || ''}));
+  if (!s.cars.length){
+    // legacy single-car state → becomes the first car of the fleet
+    const name = (typeof s.carName === 'string' && s.carName.trim() && s.carName !== 'RADICAL') ? s.carName.trim() : 'My Radical';
+    const spec = (typeof s.carSpec === 'string' && !/click to edit/i.test(s.carSpec)) ? s.carSpec.replace(/\s*·\s*click to edit.*$/i,'').trim() : '';
+    s.cars = [{id: shortId(), name, spec}];
+  }
+  const ids = new Set(s.cars.map(c => c.id));
+  s.entries = (Array.isArray(s.entries) ? s.entries : []).map(normalizeEntry).filter(Boolean);
+  s.entries.forEach(e => { if (!e.carId || !ids.has(e.carId)) e.carId = s.cars[0].id; });
+  s.people = Array.isArray(s.people) ? s.people : [];
+  s.qrBase = typeof s.qrBase === 'string' ? s.qrBase : '';
+  s.uiCar = (s.uiCar === 'all' || ids.has(s.uiCar)) ? s.uiCar : 'all';
+  return s;
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) return migrate(JSON.parse(raw));
+  }catch(e){}
+  return migrate({});
+}
+let state = loadState();
+const ui  = {expandedId:null, editingId:null, firstRender:true, qrCar:null, car:state.uiCar,
+             filters:{type:'all', person:'all', q:'', sort:'desc'}};
+const form = {type:'lapping', person:'', carId: state.cars[0] ? state.cars[0].id : ''};
+
+const save = () => localStorage.setItem(KEY, JSON.stringify(state));
+const carById = id => state.cars.find(c => c.id === id);
+const currentCar = () => ui.car === 'all' ? null : (carById(ui.car) || null);
+const carEntries = () => state.entries.filter(e => ui.car === 'all' || e.carId === ui.car);
+const chrono = () => carEntries().slice().sort(byDateAsc);
+const chronoAll = () => state.entries.slice().sort(byDateAsc);
+const numbers = () => { const m = {}; chrono().forEach((e,i) => m[e.id] = i + 1); return m; };
+function prevEngine(e){
+  const ch = chronoAll().filter(x => x.carId === e.carId);
+  const i = ch.findIndex(x => x.id === e.id);
+  for (let j = i - 1; j >= 0; j--) if (ch[j].engine != null) return ch[j].engine;
+  return null;
+}
+function matchesFilters(e){
+  const f = ui.filters;
+  if(f.type !== 'all' && e.type !== f.type) return false;
+  if(f.person !== 'all' && e.person !== f.person) return false;
+  if(f.q){
+    const q = f.q.toLowerCase();
+    const car = carById(e.carId);
+    const hay = [e.notes, e.venue, e.shop, e.person, TYPES[e.type].label, e.date, car ? car.name : ''].join(' ').toLowerCase();
+    if(!hay.includes(q)) return false;
+  }
+  return true;
+}
+const visibleEntries = () => {
+  const list = carEntries().filter(matchesFilters);
+  list.sort((a,b) => ui.filters.sort === 'desc' ? byDateAsc(b,a) : byDateAsc(a,b));
+  return list;
+};
+let toastTimer;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 3000);
+}
+function animateNum(el, to, dec=0, suffix=''){
+  const from = parseFloat(el.dataset.v || '0') || 0; el.dataset.v = to;
+  if(from === to){ el.textContent = to.toFixed(dec) + suffix; return; }
+  const t0 = performance.now(), dur = 650;
+  (function step(t){
+    const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = (from + (to - from) * e).toFixed(dec) + suffix;
+    if(p < 1) requestAnimationFrame(step);
+  })(t0);
+}
+
+/* ================= renders ================= */
+function renderMasthead(){
+  const car = currentCar();
+  const h = $('#carName'), s = $('#carSpec');
+  if (car){
+    h.textContent = car.name;
+    s.textContent = car.spec || 'Add details — chassis, engine, year';
+    h.setAttribute('contenteditable','true'); s.setAttribute('contenteditable','true');
+    document.title = `${car.name} — Log Book`;
+  } else {
+    h.textContent = 'All Radicals';
+    s.textContent = `${state.cars.length} ${state.cars.length === 1 ? 'car' : 'cars'} · ${state.entries.length} ${state.entries.length === 1 ? 'entry' : 'entries'} — pick a car below`;
+    h.setAttribute('contenteditable','false'); s.setAttribute('contenteditable','false');
+    document.title = 'Radicals — Log Book';
+  }
+  const n = chrono().length;
+  $('#mhCount').textContent = n ? `${n} ${n === 1 ? 'entry' : 'entries'} on file` : '';
+}
+
+function renderTally(){
+  const es = chrono();
+  const onTrack = es.filter(e => TYPES[e.type].onTrack);
+  const trackMin = onTrack.reduce((s,e) => s + (e.minutes || 0), 0);
+  const readings = es.filter(e => e.engine != null).map(e => e.engine);
+  const engineHrs = readings.length ? Math.max(...readings) : null;
+  const lastEngineEntry = es.slice().reverse().find(e => e.engine != null);
+  const maint = es.filter(e => e.type === 'maintenance');
+  const lastMaint = maint.length ? maint[maint.length - 1] : null;
+  const lastOut = onTrack.length ? onTrack[onTrack.length - 1] : (es.length ? es[es.length - 1] : null);
+
+  let best = null;
+  es.forEach(e => { if (e.bestLap != null && (!best || e.bestLap < best.bestLap)) best = e; });
+
+  if (engineHrs != null) animateNum($('#v-engine'), engineHrs, 1);
+  else { $('#v-engine').textContent = '—'; $('#v-engine').dataset.v = 0; }
+  $('#k-engine').textContent = lastEngineEntry ? 'meter · ' + lastEngineEntry.date : 'meter reading';
+  animateNum($('#v-time'), trackMin / 60, 1, ' h');
+  animateNum($('#v-sessions'), onTrack.length, 0);
+
+  $('#v-lap').textContent = best ? fmtLap(best.bestLap) : '—';
+  $('#k-lap').textContent = best ? (ui.car === 'all' ? 'fastest on file · ' : 'PB · ') + best.date : 'no lap timed yet';
+
+  if (lastMaint){
+    if (engineHrs != null && lastMaint.engine != null){
+      const h = Math.max(0, engineHrs - lastMaint.engine);
+      animateNum($('#v-since'), h, 1, ' h'); $('#k-since').textContent = 'last service ' + lastMaint.date;
+    } else {
+      const d = Math.floor((Date.parse(todayISO()) - Date.parse(lastMaint.date)) / 86400000);
+      animateNum($('#v-since'), Math.max(0, d), 0, ' d'); $('#k-since').textContent = 'last service ' + lastMaint.date;
+    }
+  } else { $('#v-since').textContent = '—'; $('#v-since').dataset.v = 0; $('#k-since').textContent = 'no service logged'; }
+
+  $('#v-last').textContent = lastOut ? lastOut.date : '—';
+  $('#k-last').textContent = lastOut ? (lastOut.venue || lastOut.shop || TYPES[lastOut.type].label).slice(0, 30) : '—';
+}
+
+function renderControls(){
+  const scope = carEntries();
+  // fleet chips
+  $('#carChips').innerHTML =
+    `<span class="carchip${ui.car === 'all' ? ' on' : ''}">` +
+      `<button class="cmain" data-action="car-pick" data-car="all">All cars</button>` +
+    `</span>` +
+    state.cars.map(c =>
+      `<span class="carchip${ui.car === c.id ? ' on' : ''}">` +
+        `<button class="cmain" data-action="car-pick" data-car="${esc(c.id)}">${esc(c.name)}</button>` +
+        `<button class="cqr" data-action="car-qr" data-car="${esc(c.id)}" title="QR code for ${esc(c.name)}">` +
+          `<svg class="ic ifill" style="width:12px;height:12px"><use href="#i-qr"/></svg>` +
+        `</button>` +
+      `</span>`).join('') +
+    `<button class="chip" data-action="car-add">+ Car</button>`;
+  // type chips (counts reflect the selected car)
+  const counts = {all: scope.length}; Object.keys(TYPES).forEach(k => counts[k] = 0);
+  scope.forEach(e => counts[e.type] = (counts[e.type] || 0) + 1);
+  $('#typeChips').innerHTML = ['all', ...Object.keys(TYPES)].map(k => {
+    const lbl = k === 'all' ? 'All' : TYPES[k].label;
+    return `<button class="chip${ui.filters.type === k ? ' on' : ''}" data-action="chip-type" data-type="${k}">${lbl}<span class="n">${counts[k] || 0}</span></button>`;
+  }).join('');
+  const sel = $('#pf'); const cur = ui.filters.person;
+  sel.innerHTML = `<option value="all">Everyone</option>` +
+    state.people.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
+  if (cur !== 'all' && !state.people.includes(cur)){ ui.filters.person = 'all'; sel.value = 'all'; }
+  else sel.value = cur;
+  $('#sortLbl').textContent = ui.filters.sort === 'desc' ? 'Newest first' : 'Oldest first';
+  $('#sortIc').classList.toggle('asc', ui.filters.sort === 'asc');
+  const venues = [...new Set([...VENUE_SUGGESTIONS, ...state.entries.map(e => e.venue).filter(Boolean)])];
+  $('#venueList').innerHTML = venues.map(v => `<option value="${esc(v)}">`).join('');
+}
+
+/* --- the history ribbon --- */
+function renderRibbon(){
+  const canvas = $('#rbCanvas'); const es = chrono();
+  canvas.innerHTML = '';
+  if(!es.length){
+    canvas.innerHTML = '<div class="rb-empty">The history ribbon fills in as you log</div>';
+    return;
+  }
+  const t0 = Date.parse(es[0].date), t1 = Date.parse(es[es.length-1].date);
+  const span = Math.max(t1 - t0, 86400000);
+  const X = d => ((Date.parse(d) - t0) / span) * 100;
+  const W = canvas.getBoundingClientRect().width || 1000;
+
+  const base = document.createElement('div'); base.className = 'rb-base'; canvas.appendChild(base);
+  const monTxt = (d, first) => {
+    const m = d.toLocaleDateString('en-CA', {month:'short'}).toUpperCase();
+    return first ? `${m} \u2019${String(d.getFullYear()).slice(2)}`
+         : m === 'JAN' ? `${m} ${d.getFullYear()}` : m;
+  };
+  const labels = [{x:0, txt:monTxt(new Date(es[0].date + 'T00:00'), true)}];
+  let m = new Date(es[0].date + 'T00:00'); m.setDate(1); m.setMonth(m.getMonth() + 1);
+  let lastX = 0;
+  while (Date.parse(isoOf(m)) <= t1){
+    const x = (Date.parse(isoOf(m)) - t0) / span * 100;
+    if (x * W / 100 - lastX >= 48 && x < 96){
+      labels.push({x, txt:monTxt(m, false)}); lastX = x;
+      const g = document.createElement('div'); g.className = 'rb-grid'; g.style.left = x + '%'; canvas.appendChild(g);
+    }
+    m.setMonth(m.getMonth() + 1);
+  }
+  labels.forEach(L => { const s = document.createElement('div'); s.className = 'rb-month'; s.style.left = L.x + '%'; s.textContent = L.txt; canvas.appendChild(s); });
+  es.forEach(e => {
+    const t = document.createElement('div');
+    t.className = 'tick' + (TYPES[e.type].onTrack ? '' : ' off');
+    t.dataset.id = e.id;
+    t.style.left = X(e.date) + '%';
+    t.style.height = (TYPES[e.type].onTrack ? Math.min(44, 12 + ((e.minutes || 24) / 60) * 9) : 10) + 'px';
+    canvas.appendChild(t);
+  });
+}
+function tipHTML(e){
+  const n = numbers()[e.id];
+  const car = ui.car === 'all' ? (carById(e.carId) || {}).name || '' : '';
+  const where = TYPES[e.type].onTrack ? (e.venue || e.shop) : (e.shop || e.venue);
+  return `<b>\u2116 ${pad3(n)}</b>${car ? ' · ' + esc(car) : ''} ${e.date} · ${TYPES[e.type].label.toUpperCase()}<br>` +
+         `<span class="tl">${esc(e.person)}${where ? ' — ' + esc(where) : ''}${e.minutes != null ? ' · ' + fmtMin(e.minutes) : ''}</span>`;
+}
+function showTip(html, tick){
+  const tip = $('#tip'); tip.innerHTML = html;
+  const r = tick.getBoundingClientRect();
+  tip.style.left = Math.min(Math.max(r.left + r.width / 2, 110), window.innerWidth - 110) + 'px';
+  if (r.top > 90){ tip.style.top = (r.top - 10) + 'px'; tip.classList.remove('below'); }
+  else { tip.style.top = (r.bottom + 10) + 'px'; tip.classList.add('below'); }
+  tip.classList.add('on');
+}
+const hideTip = () => $('#tip').classList.remove('on');
+
+/* --- the ledger --- */
+function entryHTML(e, n, idx, view, pbVal){
+  const T = TYPES[e.type];
+  const car = carById(e.carId);
+  const dateD = new Date(e.date + 'T00:00');
+  const wd = dateD.toLocaleDateString('en-CA', {weekday:'short'}).toUpperCase();
+  const time = e.minutes != null && e.laps ? `${fmtMin(e.minutes)} <span class="lp">· ${e.laps} L</span>`
+             : e.minutes != null ? fmtMin(e.minutes)
+             : e.laps ? `${e.laps} L` : '—';
+  const where = T.onTrack ? (e.venue || e.shop || '') : (e.shop || e.venue || '');
+  const isPB = e.bestLap != null && pbVal != null && e.bestLap === pbVal;
+  const bits = [];
+  if (view === 'all' && car) bits.push(`<span>Car <b>${esc(car.name)}</b></span>`);
+  const prev = prevEngine(e);
+  if (e.engine != null) bits.push(`<span>Engine <b>${e.engine.toFixed(1)} h</b>${prev != null ? ` · \u0394 +${(e.engine - prev).toFixed(1)} h` : ''}</span>`);
+  if (e.bestLap != null) bits.push(`<span>Best lap <b>${fmtLap(e.bestLap)}</b>${isPB ? ' · PB' : ''}</span>`);
+  if (e.airTemp != null || e.trackTemp != null)
+    bits.push(`<span>Temp <b>${e.airTemp != null ? e.airTemp + '\u00B0C' : '—'} air · ${e.trackTemp != null ? e.trackTemp + '\u00B0C' : '—'} track</b></span>`);
+  if (e.cost) bits.push(`<span>Cost <b>$${Number(e.cost).toLocaleString('en-CA')}</b></span>`);
+  const reveal = ui.firstRender ? ` reveal" style="animation-delay:${Math.min(idx * 40, 420)}ms` : '';
+  const cells = view === 'all'
+    ? `<div class="c-idx">#${pad3(n)}</div>
+       <div class="c-car" title="${esc(car ? car.name : '')}">${esc(car ? car.name : '—')}</div>
+       <div class="c-date"><span class="d">${e.date}</span><span class="wd">${wd}</span></div>
+       <div class="c-type ${T.onTrack ? 'on' : 'off'}"><span class="mk"></span>${T.label}</div>
+       <div class="c-who">${esc(e.person)}</div>
+       <div class="c-venue" title="${esc(where)}">${esc(where) || '—'}</div>
+       <div class="c-time">${time}</div>
+       <div class="c-best${isPB ? ' pb' : ''}">${fmtLap(e.bestLap)}</div>
+       <div class="c-chev">${icon('chev')}</div>`
+    : `<div class="c-idx">#${pad3(n)}</div>
+       <div class="c-date"><span class="d">${e.date}</span><span class="wd">${wd}</span></div>
+       <div class="c-type ${T.onTrack ? 'on' : 'off'}"><span class="mk"></span>${T.label}</div>
+       <div class="c-who">${esc(e.person)}</div>
+       <div class="c-venue" title="${esc(where)}">${esc(where) || '—'}</div>
+       <div class="c-time">${time}</div>
+       <div class="c-best${isPB ? ' pb' : ''}">${fmtLap(e.bestLap)}</div>
+       <div class="c-eng">${e.engine != null ? e.engine.toFixed(1) + ' h' : '—'}</div>
+       <div class="c-chev">${icon('chev')}</div>`;
+  return `<div class="entry${ui.expandedId === e.id ? ' open' : ''}${reveal}" data-id="${e.id}">
+    <div class="row" data-action="toggle">${cells}</div>
+    <div class="detail"><div class="detail-in">
+      <p class="notes">${e.notes ? esc(e.notes) : '<span class="dim">No notes for this entry.</span>'}</p>
+      <div class="meta">${bits.join('')}</div>
+      <div class="d-actions">
+        <button class="btn ghost small" data-action="edit">${icon('pencil')}Edit</button>
+        <button class="btn ghost small danger" data-action="delete">${icon('trash')}Delete</button>
+      </div>
+    </div></div>
+  </div>`;
+}
+function renderLedger(){
+  const wrap = $('#ledger');
+  const view = ui.car === 'all' ? 'all' : 'car';
+  wrap.dataset.view = view;
+  if (!state.entries.length){
+    wrap.innerHTML = `<div class="empty">
+      <div class="mk-lg"></div><h3>The ledger is empty</h3>
+      <p>Every lapping day, autoslalom and wrench session on your Radicals — in one place, on this machine.</p>
+      <div class="btns">
+        <button class="btn ghost" data-action="sample">Load sample data</button>
+        <button class="btn accent" data-action="new">${icon('plus')}Add the first entry</button>
+      </div></div>`;
+    return;
+  }
+  const list = visibleEntries();
+  if (!list.length){
+    wrap.innerHTML = `<div class="empty"><h3>Nothing matches</h3>
+      <p>No entries match the current filters.</p>
+      <div class="btns"><button class="btn ghost" data-action="clear-filters">Clear filters</button></div></div>`;
+    return;
+  }
+  const nums = numbers();
+  let pbVal = null;
+  chrono().forEach(e => { if (e.bestLap != null && (pbVal == null || e.bestLap < pbVal)) pbVal = e.bestLap; });
+  const groups = [];
+  list.forEach(e => {
+    const k = e.date.slice(0, 7), g = groups[groups.length - 1];
+    (g && g.k === k) ? g.items.push(e) : groups.push({k, items:[e]});
+  });
+  const head = view === 'all'
+    ? '<span>\u2116</span><span>Car</span><span>Date</span><span>What</span><span>Who</span><span>Venue / Where</span><span>Time</span><span>Best lap</span><span></span>'
+    : '<span>\u2116</span><span>Date</span><span>What</span><span>Who</span><span>Venue / Where</span><span>Time</span><span>Best lap</span><span>Eng. h</span><span></span>';
+  let html = `<div class="thead">${head}</div>`;
+  let i = 0;
+  groups.forEach(g => {
+    const d = new Date(g.k + '-01T00:00');
+    const gm = d.toLocaleDateString('en-CA', {month:'long', year:'numeric'});
+    const sess = g.items.filter(e => TYPES[e.type].onTrack).length;
+    const tot = g.items.reduce((s, e) => s + (e.minutes || 0), 0);
+    html += `<div class="gdiv"><span class="gm">${gm.toUpperCase()}</span><span class="gl"></span><span class="gs">${sess} on track${tot ? ` · ${fmtMin(tot)}` : ''}</span></div>`;
+    g.items.forEach(e => { html += entryHTML(e, nums[e.id], i++, view, pbVal); });
+  });
+  wrap.innerHTML = html;
+}
+function renderAll(){
+  renderMasthead(); renderTally(); renderControls(); renderRibbon(); renderLedger();
+  ui.firstRender = false;
+}
+
+/* ================= QR codes ================= */
+function qrUrlFor(car){
+  let base = (state.qrBase || '').trim();
+  if (!base) base = location.href;
+  base = base.replace(/#.*$/, '');
+  return base + '#c=' + car.id;
+}
+function openQR(carId){
+  ui.qrCar = carId; renderQR();
+  $('#qrModal').classList.add('on');
+}
+function renderQR(){
+  const car = carById(ui.qrCar); if (!car) return;
+  $('#qrCarName').textContent = car.name;
+  $('#qrCarSpec').textContent = car.spec || '';
+  const url = qrUrlFor(car);
+  const qr = TinyQR.make(url);
+  $('#qrBox').innerHTML = qr ? qrToSvg(qr) : '<div class="qr-err">Address too long for a QR code</div>';
+  $('#qrUrl').textContent = url;
+  $('#qrBase').value = state.qrBase;
+  $('#qrWarn').hidden = !/^file:/i.test(url);
+}
+function printQRCodes(ids){
+  const cars = state.cars.filter(c => ids.includes(c.id));
+  if (!cars.length) return;
+  $('#qrSheet').innerHTML = cars.map(c => {
+    const url = qrUrlFor(c);
+    const qr = TinyQR.make(url);
+    return `<div class="qcard">
+      <div class="qname">${esc(c.name)}</div>
+      ${c.spec ? `<div class="qspec">${esc(c.spec)}</div>` : ''}
+      <div class="qsvg">${qr ? qrToSvg(qr) : '<div class="qurl">Address too long</div>'}</div>
+      <div class="qurl">${esc(url)}</div>
+      <div class="qhint">Scan to open this car\u2019s log book</div>
+    </div>`;
+  }).join('');
+  document.body.classList.add('print-qr');
+  setTimeout(() => window.print(), 80);
+  setTimeout(() => document.body.classList.remove('print-qr'), 4000);
+}
+window.addEventListener('afterprint', () => document.body.classList.remove('print-qr'));
+
+/* ================= entry form ================= */
+function renderFormChips(){
+  $('#f-types').innerHTML = Object.entries(TYPES).map(([k, T]) =>
+    `<button type="button" class="tchip${form.type === k ? ' on' : ''}" data-action="type-pick" data-type="${k}">${T.label}${icon('check')}</button>`).join('');
+  $('#shopField').hidden = form.type !== 'maintenance';
+  $('#f-cars').innerHTML = state.cars.map(c =>
+    `<button type="button" class="tchip${form.carId === c.id ? ' on' : ''}" data-action="car-pick-form" data-car="${esc(c.id)}">${esc(c.name)}${icon('check')}</button>`).join('') +
+    `<button type="button" class="tchip" data-action="car-add-form">${icon('plus')}Add car</button>`;
+  const p = $('#f-people');
+  if (!state.people.length){
+    p.innerHTML = `<span class="people-hint">No one in the roster yet — add a name below.</span>`;
+  } else {
+    p.innerHTML = state.people.map(n =>
+      `<button type="button" class="tchip${form.person === n ? ' on' : ''}" data-action="person-pick" data-person="${esc(n)}">${esc(n)}${icon('check')}</button>`).join('')
+      + `<button type="button" class="tchip" data-action="person-add">${icon('plus')}Add</button>`;
+  }
+}
+function openPanel(entry){
+  ui.editingId = entry ? entry.id : null;
+  form.type = entry ? entry.type : 'lapping';
+  form.person = entry ? entry.person
+    : (chrono().length ? chrono()[chrono().length - 1].person : (state.people[0] || ''));
+  form.carId = entry ? entry.carId
+    : (ui.car !== 'all' && carById(ui.car) ? ui.car
+    : (chrono().length ? chrono()[chrono().length - 1].carId
+    : (state.cars[0] ? state.cars[0].id : '')));
+  const nums = numbers();
+  $('#panelKind').textContent = entry ? 'Edit entry' : 'New entry';
+  $('#panelTitle').textContent = entry ? `Entry \u2116 ${pad3(nums[entry.id])}` : 'Log an entry';
+  $('#f-date').value   = entry ? entry.date : todayISO();
+  $('#f-venue').value  = entry ? (entry.venue || '') : '';
+  $('#f-shop').value   = entry ? (entry.shop || '') : '';
+  $('#f-mins').value   = entry && entry.minutes != null ? entry.minutes : '';
+  $('#f-laps').value   = entry && entry.laps != null ? entry.laps : '';
+  $('#f-lap').value    = entry && entry.bestLap != null ? fmtLap(entry.bestLap) : '';
+  $('#f-engine').value = entry && entry.engine != null ? entry.engine : '';
+  $('#f-cost').value   = entry && entry.cost != null ? entry.cost : '';
+  $('#f-air').value    = entry && entry.airTemp != null ? entry.airTemp : '';
+  $('#f-track').value  = entry && entry.trackTemp != null ? entry.trackTemp : '';
+  $('#f-notes').value  = entry ? (entry.notes || '') : '';
+  $('#formError').textContent = '';
+  $('#addPersonRow').hidden = true;
+  renderFormChips();
+  $('#panel').classList.add('open'); $('#panel').setAttribute('aria-hidden','false');
+  $('#scrim').classList.add('on');
+  setTimeout(() => $('#f-date').focus(), 380);
+}
+function closePanel(){
+  $('#panel').classList.remove('open'); $('#panel').setAttribute('aria-hidden','true');
+  $('#scrim').classList.remove('on');
+  ui.editingId = null;
+}
+function markInvalid(sel, msg){
+  const f = $(sel).closest('.field'); if (f) f.classList.add('invalid');
+  $('#formError').textContent = msg;
+}
+function clearInvalid(){
+  document.querySelectorAll('.field.invalid').forEach(f => f.classList.remove('invalid'));
+}
+function submitEntry(){
+  clearInvalid();
+  const date = $('#f-date').value;
+  if (!date){ markInvalid('#f-date', 'A date is required.'); return; }
+  const carOk = form.carId && carById(form.carId);
+  if (!carOk){ markInvalid('#carField', 'Which Radical? Pick one, or add a car below.'); return; }
+  if (!form.person){ markInvalid('#personField', 'Who did it? Pick a name or add one below.'); return; }
+  const lapRaw = $('#f-lap').value.trim();
+  let bestLap = null;
+  if (lapRaw !== ''){
+    bestLap = parseLap(lapRaw);
+    if (bestLap == null || !isFinite(bestLap) || bestLap <= 0){
+      markInvalid('#f-lap', 'Best lap — use a format like 1:28.7 or 88.7.');
+      return;
+    }
+  }
+  const entry = {
+    id: ui.editingId || uid(),
+    carId: form.carId,
+    date, type: form.type, person: form.person,
+    venue: $('#f-venue').value.trim(),
+    shop: $('#f-shop').value.trim(),
+    minutes: num($('#f-mins').value), laps: num($('#f-laps').value),
+    engine: num($('#f-engine').value), cost: num($('#f-cost').value),
+    airTemp: numAny($('#f-air').value), trackTemp: numAny($('#f-track').value),
+    bestLap,
+    notes: $('#f-notes').value.trim(),
+    createdAt: ui.editingId ? (state.entries.find(e => e.id === ui.editingId)?.createdAt || Date.now()) : Date.now()
+  };
+  if (!state.people.includes(entry.person)) state.people.push(entry.person);
+  if (ui.editingId){
+    const i = state.entries.findIndex(e => e.id === ui.editingId);
+    state.entries[i] = entry;
+  } else {
+    state.entries.push(entry);
+    ui.expandedId = entry.id;
+  }
+  save(); renderAll(); closePanel();
+  const car = carById(entry.carId);
+  toast(`\u2116 ${pad3(numbers()[entry.id])} — ${car ? car.name + ' · ' : ''}${TYPES[entry.type].label} on ${entry.date} ${ui.editingId ? 'updated' : 'logged'}`);
+}
+
+/* ================= fleet management ================= */
+let carModalCtx = 'controls';
+function openCarModal(ctx){
+  carModalCtx = ctx;
+  $('#carModalMsg').textContent = ctx === 'form'
+    ? 'Add a Radical — it will be picked for this entry.'
+    : 'Add a Radical to the garage. Name it whatever you\u2019ll recognise on the chip and on the printed QR sheet.';
+  $('#nc-name').value = ''; $('#nc-spec').value = '';
+  $('#carModal').classList.add('on');
+  setTimeout(() => $('#nc-name').focus(), 120);
+}
+function saveNewCar(){
+  const name = $('#nc-name').value.trim();
+  if (!name){ $('#nc-name').focus(); return; }
+  const car = {id: shortId(), name, spec: $('#nc-spec').value.trim()};
+  state.cars.push(car);
+  if (carModalCtx === 'form') form.carId = car.id;
+  else { ui.car = car.id; state.uiCar = ui.car; }
+  save(); renderAll(); renderFormChips();
+  $('#carModal').classList.remove('on');
+  toast(`Added ${car.name} — use the \u2317 button on its chip for the QR code`);
+}
+function askDeleteCar(id){
+  const car = carById(id); if (!car) return;
+  const n = state.entries.filter(e => e.carId === id).length;
+  confirmModal('Delete car',
+    n ? `Remove \u201C${car.name}\u201D and its ${n} log ${n === 1 ? 'entry' : 'entries'}? Export a backup first if in doubt.`
+      : `Remove \u201C${car.name}\u201D from the fleet?`,
+    'Delete', () => {
+      state.cars = state.cars.filter(c => c.id !== id);
+      state.entries = state.entries.filter(e => e.carId !== id);
+      if (ui.qrCar === id){ $('#qrModal').classList.remove('on'); ui.qrCar = null; }
+      if (ui.car === id){ ui.car = 'all'; state.uiCar = 'all'; }
+      if (!state.cars.length) state.cars.push({id: shortId(), name:'My Radical', spec:''});
+      if (!state.cars.some(c => c.id === form.carId)) form.carId = state.cars[0].id;
+      save(); renderAll(); toast('Car deleted');
+    });
+}
+
+/* ================= modal / confirm ================= */
+let modalYes = null;
+function confirmModal(title, msg, label, onYes){
+  $('#mTitle').textContent = title; $('#mMsg').textContent = msg;
+  $('#mYes').textContent = label;
+  modalYes = onYes;
+  $('#modal').classList.add('on');
+}
+const hideModal = () => { $('#modal').classList.remove('on'); modalYes = null; };
+
+/* ================= data actions ================= */
+function askDelete(id){
+  const e = state.entries.find(x => x.id === id); if (!e) return;
+  const n = numbers()[id];
+  confirmModal('Delete entry', `Remove \u2116 ${pad3(n)} — ${e.date} · ${TYPES[e.type].label}? This cannot be undone.`, 'Delete', () => {
+    state.entries = state.entries.filter(x => x.id !== id);
+    if (ui.expandedId === id) ui.expandedId = null;
+    save(); renderAll(); toast('Entry deleted');
+  });
+}
+function askClearAll(){
+  if (!state.entries.length){ toast('The ledger is already empty'); return; }
+  confirmModal('Clear the ledger', `Delete all ${state.entries.length} entries? Consider exporting a JSON backup first — this cannot be undone.`, 'Delete all', () => {
+    state.entries = []; ui.expandedId = null;
+    save(); renderAll(); toast('Ledger cleared');
+  });
+}
+function loadSample(){
+  state.cars = SAMPLE.cars.map(c => ({...c}));
+  state.people = SAMPLE.people.slice();
+  state.entries = SAMPLE.entries.map(normalizeEntry).filter(Boolean);
+  state.entries.forEach(e => { if (!carById(e.carId)) e.carId = state.cars[0].id; });
+  ui.car = 'all'; state.uiCar = 'all';
+  save(); renderAll();
+  window.scrollTo({top:0, behavior:'smooth'});
+  toast('Sample fleet loaded — clear it any time from the footer');
+}
+function download(name, content, mime){
+  const b = new Blob([content], {type:mime});
+  const u = URL.createObjectURL(b);
+  const a = document.createElement('a'); a.href = u; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(u), 500);
+}
+function exportJSON(){
+  download(`radical-logbook-${todayISO()}.json`,
+    JSON.stringify({version:2, cars:state.cars, people:state.people, qrBase:state.qrBase, entries:state.entries}, null, 2),
+    'application/json');
+  toast('JSON backup downloaded');
+}
+function exportCSV(){
+  const q = v => { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; };
+  const rows = chronoAll().map(e => {
+    const car = carById(e.carId);
+    return [e.date, car ? car.name : '', TYPES[e.type].label, e.person, e.venue, e.shop,
+      e.minutes ?? '', e.laps ?? '', e.bestLap != null ? fmtLap(e.bestLap) : '',
+      e.airTemp ?? '', e.trackTemp ?? '', e.engine ?? '', e.cost ?? '', e.notes].map(q).join(',');
+  });
+  const csv = '\ufeffDate,Car,Type,Who,Venue,Performed at,Minutes,Laps,Best lap,Air \u00B0C,Track \u00B0C,Engine hrs,Cost,Notes\n' + rows.join('\n');
+  download(`radical-logbook-${todayISO()}.csv`, csv, 'text/csv');
+  toast('CSV exported — opens in any spreadsheet');
+}
+function handleImport(file){
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const data = JSON.parse(r.result);
+      const inc = Array.isArray(data) ? data : (Array.isArray(data.entries) ? data.entries : null);
+      if (!inc) throw 0;
+      if (Array.isArray(data.cars)) data.cars.forEach(c => {
+        if (c && c.id && !carById(c.id)) state.cars.push({id:c.id, name:c.name || 'Radical', spec:c.spec || ''});
+      });
+      if (!state.cars.length) state.cars.push({id: shortId(), name:'My Radical', spec:''});
+      const known = new Set(state.entries.map(e => e.id));
+      let added = 0, skipped = 0;
+      inc.forEach(raw => {
+        const e = normalizeEntry(raw);
+        if (!e) return;
+        if (known.has(e.id)){ skipped++; return; }
+        if (!e.carId || !carById(e.carId)){
+          const nm = raw && typeof raw.carName === 'string' ? raw.carName.trim() : '';
+          let c = nm ? carById(nm) || state.cars.find(x => x.name === nm) : null;
+          if (!c && nm && !state.cars.some(x => x.name === nm)){ c = {id: shortId(), name: nm, spec:''}; state.cars.push(c); }
+          e.carId = (c || state.cars[0]).id;
+        }
+        known.add(e.id);
+        state.entries.push(e);
+        added++;
+      });
+      if (Array.isArray(data.people)) data.people.forEach(p => {
+        if (typeof p === 'string' && !state.people.includes(p)) state.people.push(p);
+      });
+      save(); renderAll();
+      toast(`Imported ${added} ${added === 1 ? 'entry' : 'entries'}${skipped ? `, skipped ${skipped} already on file` : ''}`);
+    }catch(err){ toast('Could not read that file — expected a log book JSON'); }
+  };
+  r.readAsText(file);
+}
+
+/* ================= events ================= */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const act = el.dataset.action;
+  const entryRoot = el.closest('.entry');
+  const id = entryRoot ? entryRoot.dataset.id : null;
+  switch (act){
+    case 'new': openPanel(null); break;
+    case 'toggle': if (el.classList.contains('row') && id){
+        ui.expandedId = ui.expandedId === id ? null : id; renderLedger();
+      } break;
+    case 'edit': e.stopPropagation(); openPanel(state.entries.find(x => x.id === id)); break;
+    case 'delete': e.stopPropagation(); askDelete(id); break;
+    case 'chip-type': ui.filters.type = el.dataset.type; renderControls(); renderLedger(); break;
+    case 'sort': ui.filters.sort = ui.filters.sort === 'desc' ? 'asc' : 'desc'; renderControls(); renderLedger(); break;
+    case 'clear-filters':
+      ui.filters.type = 'all'; ui.filters.person = 'all'; ui.filters.q = '';
+      $('#q').value = ''; $('#pf').value = 'all';
+      renderControls(); renderLedger(); break;
+    case 'sample': loadSample(); break;
+    case 'export-json': exportJSON(); break;
+    case 'export-csv': exportCSV(); break;
+    case 'import': $('#fileImport').click(); break;
+    case 'clear-all': askClearAll(); break;
+    case 'panel-close': case 'panel-cancel': closePanel(); break;
+    case 'save-entry': submitEntry(); break;
+    case 'type-pick': form.type = el.dataset.type; renderFormChips(); break;
+    case 'person-pick': form.person = el.dataset.person; renderFormChips(); break;
+    case 'person-add':
+      $('#addPersonRow').hidden = false; $('#f-newperson').focus(); break;
+    case 'person-commit': commitPerson(); break;
+    case 'modal-cancel': hideModal(); break;
+    case 'modal-yes': if (modalYes){ const f = modalYes; hideModal(); f(); } break;
+    case 'car-pick':
+      ui.car = el.dataset.car; state.uiCar = ui.car; save(); renderAll(); break;
+    case 'car-pick-form':
+      form.carId = el.dataset.car; renderFormChips(); break;
+    case 'car-qr': openQR(el.dataset.car); break;
+    case 'car-add': openCarModal('controls'); break;
+    case 'car-add-form': openCarModal('form'); break;
+    case 'car-save': saveNewCar(); break;
+    case 'car-modal-cancel': $('#carModal').classList.remove('on'); break;
+    case 'qr-close': $('#qrModal').classList.remove('on'); break;
+    case 'qr-print': printQRCodes([ui.qrCar]); break;
+    case 'qr-print-all': printQRCodes(state.cars.map(c => c.id)); break;
+    case 'car-delete': if (ui.qrCar) askDeleteCar(ui.qrCar); break;
+  }
+});
+function commitPerson(){
+  const name = $('#f-newperson').value.trim();
+  if (!name) return;
+  if (!state.people.includes(name)) state.people.push(name);
+  form.person = name;
+  $('#f-newperson').value = ''; $('#addPersonRow').hidden = true;
+  renderFormChips(); renderControls();
+}
+ $('#f-newperson').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); commitPerson(); }});
+ $('#pf').addEventListener('change', e => { ui.filters.person = e.target.value; renderLedger(); });
+ $('#q').addEventListener('input', e => { ui.filters.q = e.target.value.trim(); renderLedger(); });
+ $('#fileImport').addEventListener('change', e => { if (e.target.files[0]) handleImport(e.target.files[0]); e.target.value = ''; });
+
+/* QR base address */
+function applyQrBase(){
+  state.qrBase = $('#qrBase').value.trim();
+  save(); renderQR();
+}
+ $('#qrBase').addEventListener('change', applyQrBase);
+ $('#qrBase').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); e.target.blur(); }});
+
+/* click outside a QR / add-car modal closes it */
+['#qrModal', '#carModal'].forEach(sel => {
+  const el = document.querySelector(sel);
+  el.addEventListener('mousedown', e => { if (e.target === el) el.classList.remove('on'); });
+});
+['nc-name', 'nc-spec'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter'){ e.preventDefault(); saveNewCar(); }
+  });
+});
+
+/* ribbon: hover tooltip + click to jump to the entry */
+ $('#rbCanvas').addEventListener('click', e => {
+  const t = e.target.closest('.tick'); if (!t) return;
+  const id = t.dataset.id;
+  ui.expandedId = id; renderLedger();
+  const el = document.querySelector(`.entry[data-id="${id}"]`);
+  if (el){
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 1400);
+  }
+});
+ $('#rbCanvas').addEventListener('mouseover', e => {
+  const t = e.target.closest('.tick');
+  if (!t){ hideTip(); return; }
+  const en = state.entries.find(x => x.id === t.dataset.id);
+  if (en) showTip(tipHTML(en), t);
+});
+ $('#rbCanvas').addEventListener('mouseleave', hideTip);
+
+/* clear inline errors as soon as the user fixes a field */
+ $('#panel').addEventListener('input', clearInvalid);
+
+/* editable car identity — edits the currently selected car */
+['carName', 'carSpec'].forEach(key => {
+  const el = document.getElementById(key);
+  el.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); el.blur(); }});
+  el.addEventListener('paste', e => {
+    e.preventDefault();
+    document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text').replace(/\n/g,' '));
+  });
+  el.addEventListener('blur', () => {
+    const car = currentCar(); if (!car) return;
+    const txt = el.innerText.replace(/\s+/g,' ').trim();
+    if (key === 'carName'){ if (txt) car.name = txt; }
+    else car.spec = (!txt || /^add details/i.test(txt)) ? '' : txt;
+    save(); renderMasthead(); renderControls(); renderLedger();
+  });
+});
+
+/* keyboard: N = new entry, Esc = close things */
+document.addEventListener('keydown', e => {
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable;
+  if (e.key === 'Escape'){
+    if ($('#modal').classList.contains('on')) hideModal();
+    else if ($('#qrModal').classList.contains('on')) $('#qrModal').classList.remove('on');
+    else if ($('#carModal').classList.contains('on')) $('#carModal').classList.remove('on');
+    else if ($('#panel').classList.contains('open')) closePanel();
+    hideTip(); return;
+  }
+  if (typing) return;
+  if (e.key.toLowerCase() === 'n' && !$('#panel').classList.contains('open')){ e.preventDefault(); openPanel(null); }
+});
+
+/* re-measure the ribbon on resize */
+let rz;
+window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(renderRibbon, 140); });
+
+/* ================= init ================= */
+(function deepLink(){
+  const mh = location.hash.match(/c=([A-Za-z0-9_-]+)/);
+  if (mh && carById(mh[1])){
+    ui.car = mh[1]; state.uiCar = ui.car; save();
+    const c = carById(mh[1]);
+    setTimeout(() => toast(`Opened ${c.name} — from its QR code`), 500);
+  }
+})();
+renderAll();
+</script>
+</body>
+</html>
